@@ -4,6 +4,13 @@ This is an extension Fork for Forge NEO
 # sd-webui-prompt-history
 Automatic store your generation info with image and apply back anytime.
 
+## Notes (Fork changes)
+- Added compatibility import for both Forge NEO and classic SD WebUI:
+  - `modules.infotext_utils`
+  - `modules.generation_parameters_copypaste`
+- Removed 1-second polling refresh in history table to stop UI flicker.
+- Switched table refresh to event-driven updates (save/delete/pagination/item click).
+
 ![image](https://github.com/namkazt/sd-webui-prompt-history/assets/6035916/0e8a4871-2f6b-48fb-8f4e-9f8b9f482889)
 
 

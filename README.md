@@ -1,5 +1,5 @@
 # NOTE:
-This is an extension for Forge NEO
+This is an extension Fork for Forge NEO
 
 # sd-webui-prompt-history
 Automatic store your generation info with image and apply back anytime.

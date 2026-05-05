@@ -339,6 +339,11 @@ def config_changed(orginal_cfg:None, new_cfg:None):
     if orginal_cfg != new_cfg:
         global_state.config_changed = True
     return new_cfg
+
+def no_update():
+    if hasattr(gr, "skip"):
+        return gr.skip()
+    return gr.update()
     
 def history_table():
     global manual_save_history, total_pages, current_page, config_dir, last_save_btn_visible
@@ -358,9 +363,9 @@ def history_table():
     
     active_class = "pmt_item_active"
     
-    table_output = gr.update()
+    table_output = no_update()
     save_btn_visible = (not global_state.automatic_save and manual_save_history is not None)
-    save_btn_output = gr.update()
+    save_btn_output = no_update()
     if last_save_btn_visible is None or save_btn_visible != last_save_btn_visible:
         save_btn_output = gr.update(visible=save_btn_visible)
         last_save_btn_visible = save_btn_visible

@@ -10,7 +10,7 @@ importlib.reload(history)
 importlib.reload(image_process_hijacker)
 
 import modules.images as images
-import modules.generation_parameters_copypaste as parameters_copypaste
+import modules.infotext_utils as parameters_copypaste
 from PIL import Image
 import time
 import html
@@ -277,7 +277,7 @@ def on_ui_tabs():
             outputs=[code_block, revert_btn, save_btn, edit_btn]
         )
         
-        # register paste for apply button
+        # register paste for apply button (Forge NEO)
         parameters_copypaste.register_paste_params_button(parameters_copypaste.ParamBinding(
             paste_button=apply_btn, tabname="txt2img", source_text_component=code_block, source_image_component=None,
         ))

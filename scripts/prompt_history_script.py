@@ -163,7 +163,7 @@ def on_ui_tabs():
             with gr.Column(scale=7): 
                 # list display column
                 table = gr.HTML('Loading...')
-                ui.load(fn=history_table, inputs=[], outputs=[table, save_last_prompt_btn], every=1)
+                ui.load(fn=history_table, inputs=[], outputs=[table, save_last_prompt_btn])
                 # receiver buttons
                 item_id_text = gr.Text(elem_id="prompt_history_item_id_text", visible=False)
                 click_item_btn = gr.Button(elem_id="prompt_history_click_item_btn", visible=False)
@@ -196,6 +196,10 @@ def on_ui_tabs():
         # manual save last generated info
         save_last_prompt_btn.click(
             fn=manually_save,
+        ).then(
+            fn=history_table,
+            inputs=[],
+            outputs=[table, save_last_prompt_btn],
         )
         
         # process when click edit button
@@ -217,6 +221,10 @@ def on_ui_tabs():
             if current_page <= 0: current_page = 1
         prev_btn.click(
             fn=prev_func,
+        ).then(
+            fn=history_table,
+            inputs=[],
+            outputs=[table, save_last_prompt_btn],
         )
         
         def select_page_func(page: str):
@@ -233,6 +241,10 @@ def on_ui_tabs():
         select_page_btn.click(
             fn=select_page_func,
             inputs=[select_page_text],
+        ).then(
+            fn=history_table,
+            inputs=[],
+            outputs=[table, save_last_prompt_btn],
         )
         
         def next_func():
@@ -243,6 +255,10 @@ def on_ui_tabs():
             if current_page > total_pages: current_page = total_pages
         next_btn.click(
             fn=next_func,
+        ).then(
+            fn=history_table,
+            inputs=[],
+            outputs=[table, save_last_prompt_btn],
         )
         
         # revert code func
@@ -301,6 +317,10 @@ def on_ui_tabs():
             inputs=[item_id_text],
             outputs=[preview_image, code_block, edit_btn],
             show_progress=False,
+        ).then(
+            fn=history_table,
+            inputs=[],
+            outputs=[table, save_last_prompt_btn],
         )
         
         # process when delete button
@@ -308,6 +328,10 @@ def on_ui_tabs():
             fn=on_delete_item,
             inputs=[item_id_text],
             show_progress=False,
+        ).then(
+            fn=history_table,
+            inputs=[],
+            outputs=[table, save_last_prompt_btn],
         )
         return [(ui, "Prompt History", "extension_prompt_history_tab")]
 
@@ -340,11 +364,6 @@ def config_changed(orginal_cfg:None, new_cfg:None):
         global_state.config_changed = True
     return new_cfg
 
-def no_update():
-    if hasattr(gr, "skip"):
-        return gr.skip()
-    return gr.update()
-    
 def history_table():
     global manual_save_history, total_pages, current_page, config_dir, last_save_btn_visible
     # update config variables
@@ -363,9 +382,9 @@ def history_table():
     
     active_class = "pmt_item_active"
     
-    table_output = no_update()
+    table_output = global_state.cached_data
     save_btn_visible = (not global_state.automatic_save and manual_save_history is not None)
-    save_btn_output = no_update()
+    save_btn_output = gr.update()
     if last_save_btn_visible is None or save_btn_visible != last_save_btn_visible:
         save_btn_output = gr.update(visible=save_btn_visible)
         last_save_btn_visible = save_btn_visible

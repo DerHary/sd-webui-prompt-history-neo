@@ -47,13 +47,7 @@ def normalize_data_dir(path_value: str):
     if not path_value:
         return default_config_dir
 
-    normalized = os.path.abspath(path_value)
-    old_default_suffix = os.path.join("extensions", "sd-webui-prompt-history", "data").lower()
-    normalized_lower = normalized.replace("/", os.sep).lower()
-
-    if normalized_lower.endswith(old_default_suffix):
-        return default_config_dir
-    return normalized
+    return os.path.abspath(path_value)
 
 
 

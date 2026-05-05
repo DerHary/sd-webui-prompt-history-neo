@@ -36,6 +36,7 @@ current_code = ""
 origin_code = "'"
 active_id = ""
 manual_save_history = None
+last_save_btn_visible = None
 # pagination
 total_pages = 1
 current_page = 1
@@ -340,7 +341,7 @@ def config_changed(orginal_cfg:None, new_cfg:None):
     return new_cfg
     
 def history_table():
-    global manual_save_history, total_pages, current_page, config_dir
+    global manual_save_history, total_pages, current_page, config_dir, last_save_btn_visible
     # update config variables
     global_state.is_enabled = config_changed(global_state.is_enabled, shared.opts.data.get('prompt_history_enabled', True))
     global_state.automatic_save = config_changed(global_state.automatic_save, shared.opts.data.get('prompt_history_automatic_save_info', True))
@@ -357,6 +358,13 @@ def history_table():
     
     active_class = "pmt_item_active"
     
+    table_output = gr.update()
+    save_btn_visible = (not global_state.automatic_save and manual_save_history is not None)
+    save_btn_output = gr.update()
+    if last_save_btn_visible is None or save_btn_visible != last_save_btn_visible:
+        save_btn_output = gr.update(visible=save_btn_visible)
+        last_save_btn_visible = save_btn_visible
+
     if global_state.config_changed or not global_state.cached_data:
         
         code = f"""
@@ -437,7 +445,8 @@ def history_table():
         """
         global_state.cached_data = code
         global_state.config_changed = False
-    return global_state.cached_data, gr.update(visible=(not global_state.automatic_save and manual_save_history is not None))
+        table_output = global_state.cached_data
+    return table_output, save_btn_output
 
 def on_ui_settings():
     section = ('prompt_history', 'Prompt History')

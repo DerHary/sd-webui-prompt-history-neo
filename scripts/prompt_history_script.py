@@ -30,7 +30,9 @@ import json
 import os
 from modules import script_callbacks, shared, scripts, ui_components
 
-config_dir = os.path.join(scripts.basedir(), "data")
+extension_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+default_config_dir = os.path.join(extension_root, "data")
+config_dir = default_config_dir
 config_file_path = "data.json"
 current_code = ""
 origin_code = "'"
@@ -40,6 +42,18 @@ last_save_btn_visible = None
 # pagination
 total_pages = 1
 current_page = 1
+
+def normalize_data_dir(path_value: str):
+    if not path_value:
+        return default_config_dir
+
+    normalized = os.path.abspath(path_value)
+    old_default_suffix = os.path.join("extensions", "sd-webui-prompt-history", "data").lower()
+    normalized_lower = normalized.replace("/", os.sep).lower()
+
+    if normalized_lower.endswith(old_default_suffix):
+        return default_config_dir
+    return normalized
 
 
 
@@ -146,12 +160,9 @@ def before_ui():
     global_state.save_thumbnail = shared.opts.data.get('prompt_history_save_thumbnail', "full")
     global_state.table_thumb_size = int(shared.opts.data.get('prompt_history_preview_thumb_size_inline', 96))
     global_state.items_per_page = int(shared.opts.data.get('prompt_history_items_per_page', 15))
-    setup_data_dir = shared.opts.data.get('prompt_history_data_path', config_dir) 
-    if setup_data_dir != "":
-        config_dir = setup_data_dir
-        global_state.history_path = setup_data_dir
-    else:
-        global_state.history_path = setup_data_dir
+    setup_data_dir = normalize_data_dir(shared.opts.data.get('prompt_history_data_path', config_dir))
+    config_dir = setup_data_dir
+    global_state.history_path = setup_data_dir
     global_state.add_config = add_config
     read_config()
 
@@ -372,7 +383,7 @@ def history_table():
     global_state.save_thumbnail = config_changed(global_state.save_thumbnail, shared.opts.data.get('prompt_history_save_thumbnail', "full"))
     global_state.table_thumb_size = config_changed(global_state.table_thumb_size, int(shared.opts.data.get('prompt_history_preview_thumb_size_inline', 96)))
     global_state.items_per_page = config_changed(global_state.items_per_page, int(shared.opts.data.get('prompt_history_items_per_page', 15)))
-    setup_data_dir = config_changed(config_dir, shared.opts.data.get('prompt_history_data_path', config_dir))
+    setup_data_dir = config_changed(config_dir, normalize_data_dir(shared.opts.data.get('prompt_history_data_path', config_dir)))
     if setup_data_dir != "" and setup_data_dir != config_dir:
         global_state.config_histories = list()
         config_dir = setup_data_dir
@@ -475,7 +486,7 @@ def history_table():
 def on_ui_settings():
     section = ('prompt_history', 'Prompt History')
     shared.opts.add_option('prompt_history_enabled', shared.OptionInfo(True, 'Enabled', section=section))
-    shared.opts.add_option('prompt_history_data_path', shared.OptionInfo(config_dir, 'Data Storage Path', section=section))
+    shared.opts.add_option('prompt_history_data_path', shared.OptionInfo(default_config_dir, 'Data Storage Path', section=section))
     shared.opts.add_option("prompt_history_preview_thumb_size_inline", shared.OptionInfo(96, "Preview thumbnail size in table", gr.Number, section=section))
     shared.opts.add_option("prompt_history_items_per_page", shared.OptionInfo(15, "Number of history items display per page", gr.Number, section=section))
     shared.opts.add_option('prompt_history_automatic_save_info', shared.OptionInfo(True, 'Automatic Save (If unset, a button will be display in Prompt History screen for save info manually)', section=section))

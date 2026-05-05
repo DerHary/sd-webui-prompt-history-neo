@@ -10,7 +10,18 @@ importlib.reload(history)
 importlib.reload(image_process_hijacker)
 
 import modules.images as images
-import modules.generation_parameters_copypaste as parameters_copypaste
+
+# Support both classic SD WebUI and Forge NEO module paths.
+parameters_copypaste = None
+for _module_name in (
+    "modules.generation_parameters_copypaste",
+    "modules.infotext_utils",
+):
+    try:
+        parameters_copypaste = __import__(_module_name, fromlist=["*"])
+        break
+    except ModuleNotFoundError:
+        continue
 from PIL import Image
 import time
 import html
@@ -277,10 +288,11 @@ def on_ui_tabs():
             outputs=[code_block, revert_btn, save_btn, edit_btn]
         )
         
-        # register paste for apply button
-        parameters_copypaste.register_paste_params_button(parameters_copypaste.ParamBinding(
-            paste_button=apply_btn, tabname="txt2img", source_text_component=code_block, source_image_component=None,
-        ))
+        # register paste for apply button when module/api is available
+        if parameters_copypaste and hasattr(parameters_copypaste, "register_paste_params_button") and hasattr(parameters_copypaste, "ParamBinding"):
+            parameters_copypaste.register_paste_params_button(parameters_copypaste.ParamBinding(
+                paste_button=apply_btn, tabname="txt2img", source_text_component=code_block, source_image_component=None,
+            ))
         
         # process when click to item
         click_item_btn.click(
